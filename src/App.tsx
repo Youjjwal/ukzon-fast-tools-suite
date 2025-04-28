@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MergePDF from "./pages/tools/pdf/Merge";
 import SplitPDF from "./pages/tools/pdf/Split";
+import ImageTools from "./pages/tools/image/Index";
 import ResizeImage from "./pages/tools/image/Resize";
 import CompressImage from "./pages/tools/image/Compress";
 import CompressVideo from "./pages/tools/video/Compress";
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/tools/pdf/merge" element={<MergePDF />} />
                 <Route path="/tools/pdf/split" element={<SplitPDF />} />
+                <Route path="/tools/image" element={<ImageTools />} />
                 <Route path="/tools/image/resize" element={<ResizeImage />} />
                 <Route path="/tools/image/compress" element={<CompressImage />} />
                 <Route path="/tools/video/compress" element={<CompressVideo />} />

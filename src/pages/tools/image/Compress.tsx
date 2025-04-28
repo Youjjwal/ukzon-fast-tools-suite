@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { API_KEYS } from "@/config/api-keys";
 
 const CompressImage = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -34,40 +35,48 @@ const CompressImage = () => {
     }
   };
 
-  const handleCompress = () => {
+  const handleCompress = async () => {
     if (!file || !preview) return;
     
     setCompressing(true);
     
-    const img = new Image();
-    img.onload = () => {
-      if (canvasRef.current) {
-        const canvas = canvasRef.current;
-        canvas.width = img.width;
-        canvas.height = img.height;
-        
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
+    try {
+      // Local compression fallback using canvas
+      const img = new Image();
+      img.onload = () => {
+        if (canvasRef.current) {
+          const canvas = canvasRef.current;
+          canvas.width = img.width;
+          canvas.height = img.height;
           
-          // Get the compressed image
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                setCompressedSize(blob.size);
-                const url = URL.createObjectURL(blob);
-                setCompressedUrl(url);
-              }
-              setCompressing(false);
-              toast.success("Image compressed successfully!");
-            },
-            file.type,
-            quality / 100
-          );
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            
+            // Get the compressed image
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  setCompressedSize(blob.size);
+                  const url = URL.createObjectURL(blob);
+                  setCompressedUrl(url);
+                }
+                setCompressing(false);
+                toast.success("Image compressed successfully!");
+              },
+              file.type,
+              quality / 100
+            );
+          }
         }
-      }
-    };
-    img.src = preview;
+      };
+      img.src = preview;
+      
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      setCompressing(false);
+      toast.error("Failed to compress image. Please try again.");
+    }
   };
   
   const handleDownload = () => {
@@ -108,7 +117,7 @@ const CompressImage = () => {
             </p>
             <div className="flex justify-center">
               <label htmlFor="file-upload">
-                <Button as="div">
+                <Button>
                   <Upload className="mr-2 h-4 w-4" />
                   Choose Image
                 </Button>
@@ -196,7 +205,7 @@ const CompressImage = () => {
             
             <div className="flex items-center gap-4">
               <label htmlFor="replace-file">
-                <Button variant="outline" as="div">
+                <Button variant="outline">
                   Change Image
                 </Button>
                 <input

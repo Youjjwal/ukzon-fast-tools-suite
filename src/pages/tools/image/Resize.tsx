@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { ImageIcon, Upload, Download, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { API_KEYS } from "@/config/api-keys";
 
 const ResizeImage = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -124,7 +125,7 @@ const ResizeImage = () => {
             </p>
             <div className="flex justify-center">
               <label htmlFor="file-upload">
-                <Button as="div">
+                <Button>
                   <Upload className="mr-2 h-4 w-4" />
                   Choose Image
                 </Button>
@@ -254,7 +255,7 @@ const ResizeImage = () => {
             
             <div className="flex items-center gap-4">
               <label htmlFor="replace-file">
-                <Button variant="outline" as="div">
+                <Button variant="outline">
                   Change Image
                 </Button>
                 <input

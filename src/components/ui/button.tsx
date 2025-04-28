@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -52,5 +53,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 )
 Button.displayName = "Button"
+
+// Helper component for button with label
+export const ButtonWithLabel = ({ children, onClick, className, ...props }: React.PropsWithChildren<{
+  onClick?: () => void;
+  className?: string;
+}>) => {
+  return (
+    <label className={className}>
+      <Button onClick={onClick} {...props}>
+        {children}
+      </Button>
+    </label>
+  );
+};
 
 export { Button, buttonVariants }
