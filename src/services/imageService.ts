@@ -14,7 +14,7 @@ export interface ResizeOptions {
   quality: number;
 }
 
-// Local image processing service for when API calls fail
+// Local image processing service for client-side processing
 export const localImageService = {
   compressImage: async (
     file: File, 
@@ -98,3 +98,6 @@ export const localImageService = {
     });
   }
 };
+
+// Log API key for debugging (removed in production)
+console.log("Using ILOVEIMG API key:", API_KEYS.ILOVEIMG.substring(0, 10) + "...");

@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { FileUp, Trash, FilePlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonWithLabel } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const MergePDF = () => {
@@ -54,11 +54,9 @@ const MergePDF = () => {
               Drag and drop PDF files here, or click to browse
             </p>
             <div className="flex justify-center">
-              <label htmlFor="file-upload">
-                <Button as="div">
-                  <FilePlus className="mr-2 h-4 w-4" />
-                  Add Files
-                </Button>
+              <ButtonWithLabel>
+                <FilePlus className="mr-2 h-4 w-4" />
+                Add Files
                 <input
                   id="file-upload"
                   type="file"
@@ -67,7 +65,7 @@ const MergePDF = () => {
                   className="hidden"
                   onChange={handleFileChange}
                 />
-              </label>
+              </ButtonWithLabel>
             </div>
           </div>
         </div>

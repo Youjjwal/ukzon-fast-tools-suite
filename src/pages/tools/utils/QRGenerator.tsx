@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from "react";
-import { QrCode, Download, Image, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { QrCode, Download, Image as ImageIcon, X } from "lucide-react";
+import { Button, ButtonWithLabel } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import QRCode from "qrcode.react";
 
 type QRType = "url" | "text" | "email" | "phone";
 type QRColor = "black" | "primary" | "blue" | "green" | "red";
@@ -29,7 +30,7 @@ const QRGenerator = () => {
   const [includeMargin, setIncludeMargin] = useState(true);
   const [logoImage, setLogoImage] = useState<string | null>(null);
   
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
   
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -54,101 +55,15 @@ const QRGenerator = () => {
     setLogoImage(null);
   };
   
-  const generateQR = () => {
-    // In a real application, we would use a library like qrcode.react
-    // to generate the QR code. For this demo, we'll simulate it.
-    
-    // This would be the code to generate a real QR code:
-    // <QRCode
-    //   value={qrText}
-    //   size={qrSize}
-    //   fgColor={colorMap[qrColor]}
-    //   includeMargin={includeMargin}
-    //   level="H" // allows for logo embedding
-    //   imageSettings={logoImage ? {
-    //     src: logoImage,
-    //     width: qrSize * 0.2,
-    //     height: qrSize * 0.2,
-    //     excavate: true,
-    //   } : undefined}
-    // />
-    
-    if (!canvasRef.current) return;
-    
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    canvas.width = qrSize;
-    canvas.height = qrSize;
-    
-    // Clear the canvas
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, qrSize, qrSize);
-    
-    // Simulate QR code (just for demo)
-    const margin = includeMargin ? qrSize * 0.1 : 0;
-    const size = qrSize - margin * 2;
-    
-    ctx.fillStyle = colorMap[qrColor];
-    
-    // Draw a simulated QR pattern
-    const blockSize = size / 25;
-    for (let i = 0; i < 25; i++) {
-      for (let j = 0; j < 25; j++) {
-        if (
-          // Position detection patterns (corners)
-          (i < 7 && j < 7) || 
-          (i < 7 && j > 17) || 
-          (i > 17 && j < 7) || 
-          // Random blocks to simulate QR pattern
-          Math.random() > 0.65
-        ) {
-          ctx.fillRect(
-            margin + i * blockSize, 
-            margin + j * blockSize, 
-            blockSize, 
-            blockSize
-          );
-        }
-      }
-    }
-    
-    // Draw position detection patterns (white squares in corners)
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(margin + 2 * blockSize, margin + 2 * blockSize, 3 * blockSize, 3 * blockSize);
-    ctx.fillRect(margin + 2 * blockSize, margin + (25 - 5) * blockSize, 3 * blockSize, 3 * blockSize);
-    ctx.fillRect(margin + (25 - 5) * blockSize, margin + 2 * blockSize, 3 * blockSize, 3 * blockSize);
-    
-    // Draw logo if provided
-    if (logoImage) {
-      const img = new Image();
-      img.onload = () => {
-        const logoSize = qrSize * 0.2;
-        const logoX = (qrSize - logoSize) / 2;
-        const logoY = (qrSize - logoSize) / 2;
-        
-        // Draw white background for logo
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
-        
-        // Draw the logo
-        ctx.drawImage(img, logoX, logoY, logoSize, logoSize);
-      };
-      img.src = logoImage;
-    }
-  };
-  
-  useEffect(() => {
-    generateQR();
-  }, [qrText, qrSize, qrColor, includeMargin, logoImage]);
-  
   const downloadQR = () => {
-    if (!canvasRef.current) return;
+    if (!qrRef.current) return;
+    
+    const canvas = qrRef.current.querySelector("canvas");
+    if (!canvas) return;
     
     const link = document.createElement('a');
     link.download = 'ukzon-qrcode.png';
-    link.href = canvasRef.current.toDataURL('image/png');
+    link.href = canvas.toDataURL('image/png');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -331,9 +246,9 @@ const QRGenerator = () => {
                   <Label className="mb-2 block">Logo (optional)</Label>
                   {!logoImage ? (
                     <div className="flex items-center gap-3">
-                      <label htmlFor="logo-upload">
-                        <Button variant="outline" as="div">
-                          <Image className="mr-2 h-4 w-4" />
+                      <ButtonWithLabel>
+                        <Button variant="outline">
+                          <ImageIcon className="mr-2 h-4 w-4" />
                           Add Logo
                         </Button>
                         <input
@@ -343,7 +258,7 @@ const QRGenerator = () => {
                           className="hidden"
                           onChange={handleLogoChange}
                         />
-                      </label>
+                      </ButtonWithLabel>
                       <p className="text-xs text-muted-foreground">
                         Adding a logo may reduce QR code readability
                       </p>
@@ -375,12 +290,20 @@ const QRGenerator = () => {
           <div>
             <div className="bg-muted/30 p-6 rounded-lg flex flex-col items-center">
               <h3 className="text-lg font-medium mb-4">Your QR Code</h3>
-              <div className="bg-white p-4 rounded mb-6">
-                <canvas 
-                  ref={canvasRef} 
-                  width={qrSize} 
-                  height={qrSize}
-                  className="max-w-full h-auto"
+              <div className="bg-white p-4 rounded mb-6" ref={qrRef}>
+                <QRCode 
+                  value={qrText}
+                  size={qrSize}
+                  fgColor={colorMap[qrColor]}
+                  includeMargin={includeMargin}
+                  level="H"
+                  imageSettings={logoImage ? {
+                    src: logoImage,
+                    width: Math.round(qrSize * 0.25),
+                    height: Math.round(qrSize * 0.25),
+                    excavate: true,
+                  } : undefined}
+                  renderAs="canvas"
                 />
               </div>
               <Button onClick={downloadQR}>

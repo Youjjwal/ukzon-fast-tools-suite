@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { FileUp, Download, FileMinus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonWithLabel } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -71,11 +71,9 @@ const SplitPDF = () => {
               Select a PDF file from your computer
             </p>
             <div className="flex justify-center">
-              <label htmlFor="file-upload">
-                <Button as="div">
-                  <FileUp className="mr-2 h-4 w-4" />
-                  Choose File
-                </Button>
+              <ButtonWithLabel>
+                <FileUp className="mr-2 h-4 w-4" />
+                Choose File
                 <input
                   id="file-upload"
                   type="file"
@@ -83,7 +81,7 @@ const SplitPDF = () => {
                   className="hidden"
                   onChange={handleFileChange}
                 />
-              </label>
+              </ButtonWithLabel>
             </div>
           </div>
         ) : (
@@ -95,8 +93,8 @@ const SplitPDF = () => {
                   {(file.size / 1024).toFixed(1)} KB • {totalPages} pages
                 </p>
               </div>
-              <label htmlFor="replace-file">
-                <Button variant="outline" size="sm" as="div">
+              <ButtonWithLabel className="inline-block">
+                <Button variant="outline" size="sm">
                   Change File
                 </Button>
                 <input
@@ -106,7 +104,7 @@ const SplitPDF = () => {
                   className="hidden"
                   onChange={handleFileChange}
                 />
-              </label>
+              </ButtonWithLabel>
             </div>
             
             <div className="mb-6 space-y-6">

@@ -1,13 +1,14 @@
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { ImageIcon, Upload, Download, Lock, Unlock } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonWithLabel } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { API_KEYS } from "@/config/api-keys";
+import { localImageService, ResizeOptions } from "@/services/imageService";
 
 const ResizeImage = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -20,8 +21,6 @@ const ResizeImage = () => {
   const [quality, setQuality] = useState(90);
   const [resizing, setResizing] = useState(false);
   const aspectRatio = originalWidth / originalHeight;
-  
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -67,45 +66,37 @@ const ResizeImage = () => {
     }
   };
 
-  const handleResize = () => {
+  const handleResize = async () => {
     if (!file || !preview) return;
     
     setResizing(true);
     
-    const img = new Image();
-    img.onload = () => {
-      if (canvasRef.current) {
-        const canvas = canvasRef.current;
-        canvas.width = width;
-        canvas.height = height;
-        
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          // Convert to blob and download
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `resized-${file.name}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              }
-              setResizing(false);
-              toast.success("Image resized successfully!");
-            },
-            file.type,
-            quality / 100
-          );
-        }
-      }
-    };
-    img.src = preview;
+    try {
+      const options: ResizeOptions = {
+        width: width,
+        height: height,
+        maintainAspectRatio: maintainAspectRatio,
+        quality: quality
+      };
+      
+      const resizedBlob = await localImageService.resizeImage(file, options);
+      
+      const url = URL.createObjectURL(resizedBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `resized-${file.name}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      setResizing(false);
+      toast.success("Image resized successfully!");
+    } catch (error) {
+      console.error("Error resizing image:", error);
+      setResizing(false);
+      toast.error("Failed to resize image. Please try again.");
+    }
   };
 
   return (
@@ -124,7 +115,7 @@ const ResizeImage = () => {
               Supports JPG, PNG, GIF, and WEBP
             </p>
             <div className="flex justify-center">
-              <label htmlFor="file-upload">
+              <ButtonWithLabel>
                 <Button>
                   <Upload className="mr-2 h-4 w-4" />
                   Choose Image
@@ -136,7 +127,7 @@ const ResizeImage = () => {
                   className="hidden"
                   onChange={handleFileChange}
                 />
-              </label>
+              </ButtonWithLabel>
             </div>
           </div>
         ) : (
@@ -254,7 +245,7 @@ const ResizeImage = () => {
             </div>
             
             <div className="flex items-center gap-4">
-              <label htmlFor="replace-file">
+              <ButtonWithLabel>
                 <Button variant="outline">
                   Change Image
                 </Button>
@@ -265,7 +256,7 @@ const ResizeImage = () => {
                   className="hidden"
                   onChange={handleFileChange}
                 />
-              </label>
+              </ButtonWithLabel>
               <Button 
                 onClick={handleResize}
                 disabled={resizing}
@@ -275,8 +266,6 @@ const ResizeImage = () => {
                 {!resizing && <Download className="ml-2 h-4 w-4" />}
               </Button>
             </div>
-            
-            <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
           </>
         )}
       </div>

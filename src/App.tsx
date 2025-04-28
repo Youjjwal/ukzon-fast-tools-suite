@@ -15,7 +15,6 @@ import SplitPDF from "./pages/tools/pdf/Split";
 import ImageTools from "./pages/tools/image/Index";
 import ResizeImage from "./pages/tools/image/Resize";
 import CompressImage from "./pages/tools/image/Compress";
-import CompressVideo from "./pages/tools/video/Compress";
 import QRGenerator from "./pages/tools/utils/QRGenerator";
 
 const queryClient = new QueryClient();
@@ -37,7 +36,6 @@ const App = () => (
                 <Route path="/tools/image" element={<ImageTools />} />
                 <Route path="/tools/image/resize" element={<ResizeImage />} />
                 <Route path="/tools/image/compress" element={<CompressImage />} />
-                <Route path="/tools/video/compress" element={<CompressVideo />} />
                 <Route path="/tools/utils/qr-generator" element={<QRGenerator />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
